@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tool="http://www.springframework.org/schema/tool" xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+            http://www.springframework.org/schema/tool http://www.springframework.org/schema/tool/spring-tool-3.1.xsd
+            http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"
+	default-lazy-init="true">
+
+	<!-- 配置数据源, 整合其他框架, 事务等. -->
+	<!-- All service facades for different functions -->
+	<!-- 自动扫描所有注解该路径 -->
+	<context:property-placeholder location="/WEB-INF/jdbc.properties" />
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+	
+	
+	
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan">
+			<list>
+				<value>com.zbk</value><!-- 扫描实体类，也就是平时所说的model -->
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate_dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate_show_sql}</prop>
+				<prop key="hibernate.format_sql">${hibernate_format_sql}</prop>
+				<prop key="hibernate.autoReconnect">true</prop>
+				 <prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- <prop key="hibernate.cache.use_second_level_cache">true</prop> -->
+				<!-- <prop key="hibernate.cache.use_query_cache">true</prop> -->
+				<!-- <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop> -->
+			</props>
+		</property>
+<!-- Hibernate对象的拦截器 -->
+		<!-- <property name="entityInterceptor" ref="hibernateEntityInterceptor"></property> -->
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+<!-- 对@Transactional这个注解进行的驱动，这是基于注解的方式使用事务配置声明， -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<!-- 貌似是@Autowired -->
+<!-- <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+	 -->
+    <bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<context:annotation-config />
+	<context:component-scan base-package="com.zbk" /> 
+	<aop:aspectj-autoproxy />
+	<aop:aspectj-autoproxy proxy-target-class="true"/> 
+</beans>
