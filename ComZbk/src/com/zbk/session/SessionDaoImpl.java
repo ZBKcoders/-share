@@ -1,9 +1,8 @@
-package com.zbk.session.dao;
+package com.zbk.session;
 
 import org.springframework.stereotype.Repository;
 
 import com.zbk.base.Interface.dao.AbstractHibernateDao;
-import com.zbk.session.Session;
 
 @Repository
 public class SessionDaoImpl extends AbstractHibernateDao<Session, Integer>{
